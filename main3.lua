@@ -18,7 +18,7 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
     -- hashlib_slim.lua
     -- SHA-256 + HMAC-SHA256 apenas
     -- Drop-in: hashlib.sha256(msg) | hashlib.hmac(hashlib.sha256, key, data)
-    -- Requer: bit32 (disponível nativamente no Roblox/Luau e na maioria dos executores)
+    -- Requer: bit32 (dispon├¡vel nativamente no Roblox/Luau e na maioria dos executores)
 
     local hashlib
 
@@ -205,7 +205,7 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
 
         local expected = hmac(masterSecret, data)
         if expected == response.name then
-            callback(nil, game) -- distração pra filtragens e testes em funções na memória(callback deve verificar parametro game pra evitar manipulação)
+            callback(nil, game) -- distra├º├úo pra filtragens e testes em fun├º├Áes na mem├│ria(callback deve verificar parametro game pra evitar manipula├º├úo)
         else
             task.wait(math.random(.1,2.9))
             callback({os.clock(), math="str"..tostring(os.time())}) -- embaralhamento
@@ -216,7 +216,7 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
     local function httpPost(url, payload)
         local HttpService = game:GetService("HttpService")
 
-        -- executor sempre expõe uma dessas no ambiente global
+        -- executor sempre exp├Áe uma dessas no ambiente global
         local fn = request
             or http_request
             or (syn and syn.request)
@@ -257,7 +257,7 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
 
         if type(hwid) ~= "string" then return getRandomPart(errorCallback, "Request failed") end
 
-        -- [2] /get_challenge — pede o server_nonce
+        -- [2] /get_challenge ÔÇö pede o server_nonce
         local challengeResp, err = httpPost(BASE_URL .. "/get_challenge", {
             hwid          = hwid,
             client_nonce  = clientNonce,
@@ -265,28 +265,28 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
         })
 
         if not challengeResp or err then
-            return getRandomPart(errorCallback, "Request failed") -- falha silenciosa (mesmo retorno de erro e sucesso pra dificultar análise)
+            return getRandomPart(errorCallback, "Request failed") -- falha silenciosa (mesmo retorno de erro e sucesso pra dificultar an├ílise)
         end
 
         local serverNonce = challengeResp.server_nonce
 
         if type(serverNonce) ~= "string" 
         or #serverNonce < 48 
-        or serverNonce:match("[^%w]") then  -- só aceita alfanumérico
+        or serverNonce:match("[^%w]") then  -- s├│ aceita alfanum├®rico
             return getRandomPart(errorCallback, "Request failed")
         end
 
-        -- [3] Monta o proof com a key do usuário como segredo HMAC
+        -- [3] Monta o proof com a key do usu├írio como segredo HMAC
         local proof, _ = buildProof(key, serverNonce, hwid, clientNonce, timestamp)
 
-        -- [4] /validate — envia proof + key (apenas na primeira ativação)
+        -- [4] /validate ÔÇö envia proof + key (apenas na primeira ativa├º├úo)
         local validateResp, err2 = httpPost(BASE_URL .. "/validate", {
             hwid          = hwid,
             server_nonce  = serverNonce,
             client_nonce  = clientNonce,
             timestamp     = timestamp,
             proof         = proof,
-            key           = key, -- server ignora se o HWID já está bound
+            key           = key, -- server ignora se o HWID j├í est├í bound
         })
 
         if not validateResp or err2 then
@@ -312,7 +312,7 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
             end
         end
 
-        local response = { -- entradas não tão obvias
+        local response = { -- entradas n├úo t├úo obvias
             visible = validateResp.success,
             color = validateResp.token,
             transparency = validateResp.expiry,
@@ -323,12 +323,12 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
         return verifySignature(response, MASTER_SECRET, errorCallback, function(sigErr, _gameRef)
 
             -- Quem chamar check() deve passar um callback que verifique
-            -- se o segundo parâmetro é `game` (referência real) como prova
-            -- de que o fluxo não foi manipulado na memória
+            -- se o segundo par├ómetro ├® `game` (refer├¬ncia real) como prova
+            -- de que o fluxo n├úo foi manipulado na mem├│ria
             if sigErr ~= nil then return end
             if _gameRef ~= game then return end
 
-            -- Validação extra dos campos do response
+            -- Valida├º├úo extra dos campos do response
             if not validateResp.success
             or type(validateResp.token) ~= "string"
             or type(validateResp.expiry) ~= "number"
@@ -336,12 +336,12 @@ SharkHub:CreateAccessGui(function(key, returnCallback)
                 return
             end
 
-            -- Verifica expiração do token já na chegada
+            -- Verifica expira├º├úo do token j├í na chegada
             if validateResp.expiry <= getTimestamp() then
                 return
             end
 
-            -- [6] Salva sessão para requests futuros (sem precisar reenviar key)
+            -- [6] Salva sess├úo para requests futuros (sem precisar reenviar key)
             _session.token       = validateResp.token
             _session.serverNonce = validateResp.new_server_nonce
             _session.hwid        = hwid
@@ -483,9 +483,10 @@ local function click(button, touch)
     local cx = pos.X + size.X / 2
     local cy = pos.Y + size.Y / 2 + GuiService:GetGuiInset().Y
     if touch then
-        VirtualInputManager:SendTouchEvent(0, 0, cx, cy)
+        local PARRY_TOUCH_ID = 9
+        VirtualInputManager:SendTouchEvent(PARRY_TOUCH_ID, 0, cx, cy)
         task.wait()
-        VirtualInputManager:SendTouchEvent(0, 2, cx, cy)
+        VirtualInputManager:SendTouchEvent(PARRY_TOUCH_ID, 2, cx, cy)
     else
         VirtualInputManager:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
         task.wait()
@@ -542,7 +543,7 @@ local function getNearestUnblockedPos(): Vector2?
     for _, entry in ipairs(sortedPositions) do
         local pos = Vector2.new(entry.X * viewport.X, entry.Y * viewport.Y)
         if not isBlockedByUI(pos) then
-            return entry  -- retorna a escala, não o pixel
+            return entry  -- retorna a escala, n├úo o pixel
         end
     end
 
@@ -611,7 +612,7 @@ local function parryExternal()
         local ok, err = pcall(function()
             local httpFunc = request or (syn and syn.request) or (http and http.request)
             if not httpFunc then
-                warn("[External Parry] Executor não suporta HTTP requests.")
+                warn("[External Parry] Executor n├úo suporta HTTP requests.")
                 return
             end
 
@@ -1008,7 +1009,7 @@ do
         entry.predDot.Visible = false
     end
 
-    -- só escreve dados — zero custo
+    -- s├│ escreve dados ÔÇö zero custo
     local function onTrackingFire(ballId, ballName, position, velocity)
         BallESP._cache[ballId] = {
             name          = ballName,
@@ -1018,7 +1019,7 @@ do
         }
     end
 
-    -- toda lógica de desenho aqui, roda no PreRender
+    -- toda l├│gica de desenho aqui, roda no PreRender
     local function renderAll()
         local root = Players.LocalPlayer.Character
             and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -1097,7 +1098,7 @@ do
             entry.velLine.Visible = false
 
             -- Predicted pos
-            local vmag = velocity.Magnitude  -- ← adiciona essa linha
+            local vmag = velocity.Magnitude  -- ÔåÉ adiciona essa linha
             local direction = vmag > 0 and velocity.Unit or Vector3.zero
             local predWorld = position + direction * globalConfigs.combat_appredict
             local ps, pon = Camera:WorldToViewportPoint(predWorld)
@@ -1239,7 +1240,7 @@ local AutoMove = {} do
             end
         end
         -- MODO SAFE:
-        -- gera random X em relação a bola
+        -- gera random X em rela├º├úo a bola
         -- calcula raycast pra nao ficar andando na parede do nada
 
         -- pulos em tempos bem longos indeterminados
@@ -1254,7 +1255,7 @@ local AutoMove = {} do
         active = true
         threadCount += 1
         local threadShot = threadCount
-        -- corre até a bola
+        -- corre at├® a bola
         -- da dash quando muito longe dela
         -- se tiver muito perto de alguem fica pulando
         -- se afasta pra evitar clash
