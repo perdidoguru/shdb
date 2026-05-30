@@ -456,46 +456,6 @@ local function isMobile()
     return playerGui:FindFirstChild("MobileButtonsGUI") ~= nil
 end
 
-local function isClickable(button)
-    if not button.Visible then return false end
-    local obj = button.Parent
-    while obj do
-        if obj:IsA("ScreenGui") then return obj.Enabled end
-        if obj:IsA("GuiObject") and not obj.Visible then return false end
-        obj = obj.Parent
-    end
-    return true
-end
-
-local function click(button, touch)
-    local GuiService = game:GetService("GuiService")
-    task.wait(.1)
-    local elapsed = .1
-    while not isClickable(button) do
-        elapsed += task.wait()
-        if elapsed >= 5 then
-            warn("[click] timeout: " .. button:GetFullName())
-            return false
-        end
-    end
-    local pos = button.AbsolutePosition
-    local size = button.AbsoluteSize
-    local cx = pos.X + size.X / 2
-    local cy = pos.Y + size.Y / 2 + GuiService:GetGuiInset().Y
-    if touch then
-        local PARRY_TOUCH_ID = 9
-        VirtualInputManager:SendTouchEvent(PARRY_TOUCH_ID, 0, cx, cy)
-        task.wait()
-        VirtualInputManager:SendTouchEvent(PARRY_TOUCH_ID, 2, cx, cy)
-    else
-        VirtualInputManager:SendMouseButtonEvent(cx, cy, 0, true, game, 0)
-        task.wait()
-        VirtualInputManager:SendMouseButtonEvent(cx, cy, 0, false, game, 0)
-    end
-    task.wait(.1)
-    return true
-end
-
 --// Parry.lua //--
 local SCALES = { 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9 }
 local activeScale: Vector2? = nil
@@ -582,7 +542,7 @@ local function parryInternal()
             and playerGui.MobileButtonsGUI:FindFirstChild("MobileButtonHolder")
             and playerGui.MobileButtonsGUI.MobileButtonHolder:FindFirstChild("DeflectButton")
         if mobileDeflect then
-            click(mobileDeflect, true)
+            firesignal(mobileDeflect.Activated)
         end
         return
     end
