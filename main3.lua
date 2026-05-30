@@ -542,7 +542,12 @@ local function parryInternal()
             and playerGui.MobileButtonsGUI:FindFirstChild("MobileButtonHolder")
             and playerGui.MobileButtonsGUI.MobileButtonHolder:FindFirstChild("DeflectButton")
         if mobileDeflect then
-            firesignal(mobileDeflect.Activated)
+            local pos = mobileDeflect.AbsolutePosition
+            local size = mobileDeflect.AbsoluteSize
+            local cx = pos.X + size.X / 2
+            local cy = pos.Y + size.Y / 2
+            VirtualInputManager:SendTouchEvent(9, 0, cx, cy)
+            VirtualInputManager:SendTouchEvent(9, 2, cx, cy)
         end
         return
     end
